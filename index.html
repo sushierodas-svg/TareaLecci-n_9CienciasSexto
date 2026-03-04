@@ -77,7 +77,6 @@
             border: 2px solid #E0E0E0;
             border-radius: 8px;
             margin-bottom: 30px;
-            page-break-inside: avoid;
         }
 
         .semafo-title {
@@ -132,6 +131,7 @@
         }
 
         .content-area {
+            width: 100%;
             min-height: 250px;
             border: 2px dashed #CCC;
             padding: 15px;
@@ -139,13 +139,27 @@
             background: #FAFAFA;
             font-size: 0.95em;
             color: #666;
-            resize: none;
             font-family: 'Segoe UI', sans-serif;
+            line-height: 1.5;
+            outline: none;
+            overflow: visible;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
-        .content-area::placeholder {
+        .content-area:focus {
+            border-color: #FF6B35;
+            background: #FFF;
+        }
+
+        .content-area:empty:before {
+            content: attr(data-placeholder);
             color: #AAA;
             font-style: italic;
+        }
+
+        .capture-hidden {
+            display: none !important;
         }
 
         @media (max-width: 768px) {
@@ -235,13 +249,12 @@
             border-top: 1px solid #EEE;
         }
 
-        @media print {
-            body {
-                background: white;
-            }
-            .button-container, .instructions {
-                display: none;
-            }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #FF6B35;
+            margin-top: 10px;
+            font-weight: bold;
         }
 
         .download-info {
@@ -249,13 +262,6 @@
             color: #1B4965;
             font-size: 0.95em;
             margin-top: 15px;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            color: #FF6B35;
-            margin-top: 10px;
         }
     </style>
 </head>
@@ -269,43 +275,37 @@
         <div class="instructions">
             <h2>📝 Instrucciones para completar:</h2>
             <ol>
-                <li><strong>Columna Verde (✅):</strong> Escribe información sobre prevención, protección y comportamientos seguros relacionados con enfermedades de transmisión sexual.</li>
-                <li><strong>Columna Amarilla (⚠️):</strong> Escribe síntomas, signos de alerta y situaciones de riesgo que debes identificar.</li>
-                <li><strong>Columna Roja (❌):</strong> Escribe comportamientos peligrosos, mitos sobre enfermedades de transmisión sexual y lo que NO debes hacer.</li>
+                <li><strong>Columna Verde (✅):</strong> Escribe información sobre prevención, protección y comportamientos seguros.</li>
+                <li><strong>Columna Amarilla (⚠️):</strong> Escribe síntomas, signos de alerta y situaciones de riesgo.</li>
+                <li><strong>Columna Roja (❌):</strong> Escribe comportamientos peligrosos y lo que NO debes hacer.</li>
                 <li>Completa cada sección con información de la lección.</li>
-                <li>Cuando termines, haz clic en <strong>"Descargar como PNG"</strong> para guardar tu diagrama.</li>
+                <li>Haz clic en <strong>"Descargar como PNG"</strong> para guardar tu diagrama.</li>
             </ol>
         </div>
 
         <div id="diagramContainer">
             <div class="semafo-title">EL SEMÁFORO</div>
             
-            <div class="semafo-grid">
+            <div class="semafo-grid" id="mainGrid">
                 <!-- COLUMNA VERDE -->
                 <div class="semafo-column">
                     <div class="emoji-container">✅</div>
                     <div class="semafo-label green">SEGURO / PREVENCIÓN</div>
-                    <textarea id="green-content" 
-                              class="content-area" 
-                              placeholder="Escribe aquí información sobre prevención y comportamientos seguros..."></textarea>
+                    <div id="green-content" class="content-area" contenteditable="true" data-placeholder="Escribe aquí información sobre prevención y comportamientos seguros..."></div>
                 </div>
 
                 <!-- COLUMNA AMARILLA -->
                 <div class="semafo-column">
                     <div class="emoji-container">⚠️</div>
                     <div class="semafo-label yellow">PRECAUCIÓN / SÍNTOMAS</div>
-                    <textarea id="yellow-content" 
-                              class="content-area" 
-                              placeholder="Escribe aquí síntomas y señales de alerta..."></textarea>
+                    <div id="yellow-content" class="content-area" contenteditable="true" data-placeholder="Escribe aquí síntomas y señales de alerta..."></div>
                 </div>
 
                 <!-- COLUMNA ROJA -->
                 <div class="semafo-column">
                     <div class="emoji-container">❌</div>
                     <div class="semafo-label red">PELIGRO / RIESGO</div>
-                    <textarea id="red-content" 
-                              class="content-area" 
-                              placeholder="Escribe aquí comportamientos peligrosos y mitos..."></textarea>
+                    <div id="red-content" class="content-area" contenteditable="true" data-placeholder="Escribe aquí comportamientos peligrosos y mitos..."></div>
                 </div>
             </div>
 
@@ -325,17 +325,16 @@
         </div>
 
         <div class="loading" id="loadingIndicator">
-            ⏳ Procesando descarga... Por favor espera
+            ⏳ Descargando... Por favor espera
         </div>
 
         <div class="download-info">
-            💡 El archivo PNG se descargará automáticamente a tu computadora para compartir con tu maestra.
+            💡 El archivo PNG se descargará automáticamente para compartir con tu maestra.
         </div>
 
         <div class="note">
             <strong>Nota importante para estudiantes:</strong> 
-            Completa este diagrama con la información de la lección. Puedes escribir cuanto consideres necesario en cada sección. 
-            Cuando hayas terminado, descarga el diagrama en PNG y comparte el archivo con tu maestra a través del sistema de tareas de la clase.
+            Completa este diagrama con la información de la lección. Cuando hayas terminado, descarga el diagrama en PNG y comparte el archivo con tu maestra.
         </div>
     </div>
 
@@ -348,26 +347,23 @@
                 day: 'numeric' 
             });
 
-        // Guardar datos automáticamente en localStorage
-        const textareas = document.querySelectorAll('textarea');
-        textareas.forEach(textarea => {
-            textarea.addEventListener('input', guardarDatos);
-            // Restaurar datos guardados
-            const saved = localStorage.getItem(textarea.id);
-            if (saved) {
-                textarea.value = saved;
-            }
+        const contentAreas = ['green-content', 'yellow-content', 'red-content'];
+
+        // Configurar áreas editables
+        contentAreas.forEach(id => {
+            const element = document.getElementById(id);
+            
+            element.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const text = e.clipboardData.getData('text/plain');
+                document.execCommand('insertText', false, text);
+            });
         });
 
-        function guardarDatos(e) {
-            localStorage.setItem(e.target.id, e.target.value);
-        }
-
         function limpiarFormulario() {
-            if (confirm('¿Estás seguro de que deseas limpiar todo el contenido? Esta acción no se puede deshacer.')) {
-                textareas.forEach(textarea => {
-                    textarea.value = '';
-                    localStorage.removeItem(textarea.id);
+            if (confirm('¿Estás seguro? Se borrará todo el contenido.')) {
+                contentAreas.forEach(id => {
+                    document.getElementById(id).innerHTML = '';
                 });
             }
         }
@@ -377,65 +373,69 @@
             const loading = document.getElementById('loadingIndicator');
             
             try {
-                // Mostrar indicador de carga
                 loading.style.display = 'block';
                 button.disabled = true;
                 button.textContent = '⏳ Descargando...';
 
-                // Obtener el elemento a convertir
-                const element = document.getElementById('diagramContainer');
+                // Crear copia del contenedor
+                const container = document.getElementById('diagramContainer');
+                const clone = container.cloneNode(true);
                 
-                // Configurar opciones para html2canvas
-                const canvas = await html2canvas(element, {
+                // Crear elemento temporal para captura
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.left = '-9999px';
+                tempDiv.style.top = '-9999px';
+                tempDiv.style.width = '1000px';
+                tempDiv.style.backgroundColor = 'white';
+                tempDiv.style.padding = '30px';
+                tempDiv.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+                
+                tempDiv.appendChild(clone);
+                document.body.appendChild(tempDiv);
+
+                // Esperar a que se renderice
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Capturar
+                const canvas = await html2canvas(tempDiv, {
                     scale: 2,
                     useCORS: true,
                     logging: false,
                     backgroundColor: '#ffffff',
-                    windowHeight: element.scrollHeight,
-                    windowWidth: element.scrollWidth
+                    windowHeight: tempDiv.scrollHeight,
+                    windowWidth: 1000,
+                    allowTaint: true
                 });
 
-                // Convertir a blob y descargar
+                // Limpiar
+                document.body.removeChild(tempDiv);
+
+                // Descargar
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = url;
-                    
-                    // Nombre del archivo con fecha
-                    const fecha = new Date().toISOString().slice(0, 10);
-                    link.download = `Diagrama_Semafo_${fecha}.png`;
-                    
+                    link.download = 'Diagrama_Semafo_' + new Date().toISOString().slice(0,10) + '.png';
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(url);
 
-                    // Restaurar botón
                     loading.style.display = 'none';
                     button.disabled = false;
                     button.textContent = '📥 Descargar como PNG';
-
-                    // Mensaje de éxito
-                    alert('✅ Tu diagrama ha sido descargado correctamente. Ya puedes compartirlo con tu maestra.');
+                    alert('Tu diagrama fue descargado correctamente.');
                 });
 
             } catch (error) {
-                console.error('Error al descargar:', error);
+                console.error('Error:', error);
                 loading.style.display = 'none';
                 button.disabled = false;
                 button.textContent = '📥 Descargar como PNG';
-                alert('❌ Hubo un error al descargar. Por favor, intenta de nuevo.');
+                alert('Error al descargar. Intenta de nuevo.');
             }
         }
-
-        // Prevenir que se pierdan datos al cerrar la página
-        window.addEventListener('beforeunload', function(e) {
-            const tieneContenido = Array.from(textareas).some(ta => ta.value.trim());
-            if (tieneContenido) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        });
     </script>
 </body>
 </html>
